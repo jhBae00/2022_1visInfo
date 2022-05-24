@@ -33,8 +33,8 @@ let controls = d3.select("#container").select("#controls")
 let legend = d3.select("#legend")
 
 // Create scales to be used to visualize data. We do not know the domain until we read in data.
-let gasConsumptionScale = d3.scaleSequential().interpolator(d3.interpolateOrRd)
-let populationScale = d3.scalePow().range([20, 300]);
+let facNumDegree = d3.scaleSequential().interpolator(d3.interpolateOrRd)
+// let populationScale = d3.scalePow().range([20, 300]);
 let partyScale = d3.scaleLinear().domain([50,100]).range([0.3,0.95])
 
 // TODO
@@ -172,7 +172,7 @@ let mainMap = mainG.selectAll("path")
         for(let i = 0; i < clicked.length; i++) {
           if(clicked[i] == d2.properties.NAME) {
             console.log(d2.properties.NAME)
-            return facNumDegree(d2.properties.fedNum);
+            return facNumDegree(d2.properties.medNum);
           }
         }
         return '#ccc';
@@ -182,7 +182,7 @@ let mainMap = mainG.selectAll("path")
 
     // Enables the Gas Consumption Visualization on map.
     controls.select("#setGasViz").on("click", function() {
-      mainMap.transition().duration(500)
+      mainMap.transition().duration(1000)
         .style("fill", function(d) {
         //Get data value
         let value = d.properties.medNum;
@@ -201,9 +201,6 @@ let mainMap = mainG.selectAll("path")
 
     // Fire the click event to initalize Gas Visualization
     eventFire(document.getElementById('setGasViz'), 'click');
-
-
-
 
 
     //////////////////
