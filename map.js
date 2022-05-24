@@ -71,15 +71,16 @@ d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
           countyMap.features[i].properties.regsBoth = regesBoth;
           countyMap.features[i].properties.regsOnlyOSHPD = regsOnlyOSHPD;
           countyMap.features[i].properties.statusClosed = statusClosed;
-          countyMap.features[j].properties.statusOpen = statusOpen;
-          countyMap.features[j].properties.statusSuspense = statusSuspense;
-          countyMap.features[j].properties.statusUC = statusUC;
-          if(size != true){
-            countyMap.features[j].properties.medNum = 0;
+          countyMap.features[i].properties.statusOpen = statusOpen;
+          countyMap.features[i].properties.statusSuspense = statusSuspense;
+          countyMap.features[i].properties.statusUC = statusUC;
+          if(size !=true){
+            countyMap.features[i].properties.medNum = 0;
           }
           else{
-            countyMap.features[j].properties.medNum = size;
+            countyMap.features[i].properties.medNum = size;
           }
+
           break;
         }
         break;
@@ -89,7 +90,7 @@ d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
 
 let a = countyMap.features[3].properties.medNum
 //// debug
-console.log(a);
+console.log(typeof(a));
 
 // Calculate the domains of our scales, now that we have the data.
 let gasMin = d3.min(countyMap.features, function(d) { return d.properties.medNum; })
@@ -156,7 +157,7 @@ barGroups
 //console.log(countyMap);
 
 // Initialize the main map of California with tooltips giving detailed information per county.
-let mainMap = mainG.selectAll("path")
+let mapGraph = mainG.selectAll("path")
   .data(countyMap.features)
   .enter()
   .append("path")
@@ -173,11 +174,12 @@ let mainMap = mainG.selectAll("path")
       else {
         clicked.push(d.properties.NAME);
       }
-      mainG.selectAll("path").transition().duration(500).style("fill", function(d2) {
+      mainG.selectAll("path").transition().duration(500).style("fill", function(d) {
         for(let i = 0; i < clicked.length; i++) {
-          if(clicked[i] == d2.properties.NAME) {
-            console.log(d2.properties.NAME)
-            return facNumDegree(d2.properties.medNum);
+          if(clicked[i] == d.properties.NAME) {
+            console.log(d.properties.NAME)
+            console.log(d.properties.medNum)
+            return facNumDegree(d.properties.medNum);
           }
         }
         return '#ccc';
@@ -187,10 +189,16 @@ let mainMap = mainG.selectAll("path")
 
     // Enables the Gas Consumption Visualization on map.
     controls.select("#setGasViz").on("click", function() {
-      mainMap.transition().duration(1000)
+      mapGraph.transition().duration(700)
         .style("fill", function(d) {
+        //  if(){
+
+        //  }
+        //  else{}
+
         //Get data value
         let value = d.properties.medNum;
+        console.log(d.properties.medNum)
         if (value) {
           //If value exists…
           return facNumDegree(value);
@@ -205,7 +213,7 @@ let mainMap = mainG.selectAll("path")
 
 
     // Fire the click event to initalize Gas Visualization
-    eventFire(document.getElementById('setGasViz'), 'click');
+    //eventFire(document.getElementById('setGasViz'), 'click');
 
 
     //////////////////
