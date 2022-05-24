@@ -6,8 +6,8 @@ let h = 600;
 
 let projection = d3.geoMercator()
              .center([ -120, 37 ])
-             .translate([ 390, 300 ])
-             .scale([ 780*3.3 ]);
+             .translate([ 290, 310 ])
+             .scale([ 780*3.1 ]);
 
 let path = d3.geoPath()
          .projection(projection);
@@ -19,14 +19,13 @@ let svg = d3.select("#container")
 
 let geoGraph = svg.append("g")
 let barChart = svg.append("g")
-    .attr("transform", "translate(800 10)")
+    .attr("transform", "translate(700 16)")
 
 console.log("dddddd")
 console.log(geoGraph)
 
 let tasks = d3.select("#container").select("#tasks")
 let facNumDegree = d3.scaleSequential().interpolator(d3.interpolateOrRd)
-let partyAxisScale = d3.scaleLinear().domain([50,100]).range([0.3,0.95])
 
 
 d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
@@ -138,7 +137,7 @@ barChart.append('text')
   .attr('y', -50)
   .attr('transform', 'rotate(-90)')
   .attr('text-anchor', 'middle')
-  .text('Medical Facitilty Condition'+ d)
+  .text('Medical Facitilty Condition')
 
   let barGroups = barChart.selectAll()
     .data(medFacData)
@@ -163,7 +162,7 @@ let mapGraph = geoGraph.selectAll("path")
   .enter()
   .append("path")
     .attr("d", path)
-    .style("fill", "#CCB")
+    .style("fill", "#DBDBDB")
     .on("click", function(d) {
       if(clicked.length == 0) {
         clicked.push(d.properties.NAME)
@@ -188,7 +187,7 @@ let mapGraph = geoGraph.selectAll("path")
 
     })
 
-    tasks.select("#status").on("click", function() {
+    tasks.select("#task1").on("click", function() {
       mapGraph.transition().duration(700)
         .style("fill", function(d) {
         //  if(){
@@ -201,7 +200,22 @@ let mapGraph = geoGraph.selectAll("path")
         if (value) {
           return facNumDegree(value);
         } else {
-          return "#CCB";
+          return "#DBDBDB";
+        }
+      })
+      //initialize
+      clicked = [];
+      barChart.selectAll("rect").attr("stroke", "none")
+    })
+    tasks.select("#task2").on("click", function() {
+      mapGraph.transition().duration(700)
+        .style("fill", function(d) {
+
+        let value = d.properties.ALAND;
+        if (value) {
+          return facNumDegree(value);
+        } else {
+          return "#DBDBDB";
         }
       })
       //initialize
