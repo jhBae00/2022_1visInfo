@@ -82,20 +82,19 @@ d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
     }
 
 
-
+let a = countyMap.features[3].properties.medNum
 //// debug
-console.log(countyMap);
+console.log(a);
 
 // Calculate the domains of our scales, now that we have the data.
 let gasMin = d3.min(countyMap.features, function(d) { return d.properties.medNum; })
 let gasMax = d3.max(countyMap.features, function(d) { return d.properties.medNum; })
-gasConsumptionScale.domain(d3.extent(countyMap.features, function(d) { return d.properties.medNum; }))
-populationScale.domain(d3.extent(countyMap.features, function(d) { return d.properties.population }))
+facNumDegree.domain(d3.extent(countyMap.features, function(d) { return d.properties.medNum; }))
 
 // Calculate scales of the 2nd visualization (bar graph)
 let xScale = d3.scaleBand()
       .range([0, w-80])
-      .domain(countyMap.features.map((s) => s.properties.countyName))
+      .domain(countyMap.features.map((s) => s.properties.NAME))
       .padding(0.2)
 
 let yScale = d3.scaleLinear()
@@ -141,10 +140,11 @@ let clicked = []
 barGroups
   .append('rect')
   .attr('class', 'bar')
-  .attr('x', (g) => xScale(g.properties.countyName))
+  .attr('x', (g) => xScale(g.properties.NAME))
   .attr('y', (g) => yScale(g.properties.medNum))
   .attr('height', (g) => h- yScale(g.properties.medNum) - 100)
   .attr('width', xScale.bandwidth())
+  .style("fill", "#CCB")
 
 
 //// debug
@@ -156,7 +156,7 @@ let mainMap = mainG.selectAll("path")
   .enter()
   .append("path")
     .attr("d", path)
-    .style("fill", "#CCC")
+    .style("fill", "#CCB")
     .on("click", function(d) {
       if(clicked.length == 0) {
         clicked.push(d.properties.NAME)
@@ -172,13 +172,39 @@ let mainMap = mainG.selectAll("path")
         for(let i = 0; i < clicked.length; i++) {
           if(clicked[i] == d2.properties.NAME) {
             console.log(d2.properties.NAME)
-            return gasConsumptionScale(d2.properties.gasPerPop);
+            return facNumDegree(d2.properties.fedNum);
           }
         }
         return '#ccc';
       })
-     
+
     })
+
+    // Enables the Gas Consumption Visualization on map.
+    controls.select("#setGasViz").on("click", function() {
+      mainMap.transition().duration(500)
+        .style("fill", function(d) {
+        //Get data value
+        let value = d.properties.medNum;
+        if (value) {
+          //If value exists…
+          return facNumDegree(value);
+        } else {
+          //If value is undefined…
+          return "#CCC";
+        }
+      })
+      clicked = [];
+      linkG.selectAll("rect").attr("stroke", "none")
+    })
+
+
+    // Fire the click event to initalize Gas Visualization
+    eventFire(document.getElementById('setGasViz'), 'click');
+
+
+
+
 
     //////////////////
   })
