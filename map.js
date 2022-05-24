@@ -54,12 +54,14 @@ d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
     for (let i = 0; i < countyMap.features.length; i++) {
 
       let mapCountyName = countyMap.features[i].properties.NAME;
+      console.log(mapCountyName)
       console.log("jsonparsingOIs Going on!")
       for(let j = 0; j < medFacData.length; j++) {
-        if(medFacData[j].COUNTY_NAME.toUpperCase() == mapCountyName) {
+        if(medFacData[j].COUNTY_NAME.toUpperCase() == mapCountyName.toUpperCase()) {
+          console.log("hitted off!")
           let regsBoth, regsOnlyOSHPD, statusClosed, statusOpen, statusSuspense, statusUC, size;
           //countyName = medFacData[j].COUNTY_NAME;
-          regedBoth = medFacData[j].both;
+          regesBoth = medFacData[j].both;
           regsOnlyOSHPD = medFacData[j].onlyOSHPD;
           statusClosed = medFacData[j].Closed;
           statusOpen =medFacData[j].Open;
@@ -67,7 +69,7 @@ d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
           statusUC = medFacData[j].Under_Construction;
           size = medFacData[j].size;
 
-          countyMap.features[i].properties.countyName = mapCountyName;
+          //countyMap.features[i].properties.countyName = mapCountyName;
           countyMap.features[i].properties.regsBoth = regesBoth;
           countyMap.features[i].properties.regsOnlyOSHPD = regsOnlyOSHPD;
           countyMap.features[i].properties.statusClosed = statusClosed;
