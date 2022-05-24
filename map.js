@@ -25,6 +25,9 @@ let linkG = svg.append("g")
     .attr("transform", "translate(800 10)")
     .attr("class", "noPointerEvents")
 
+console.log("dddddd")
+console.log(mainG)
+
 // Reference to our controls panel and legend svg in the HTML
 let controls = d3.select("#container").select("#controls")
 let legend = d3.select("#legend")
@@ -44,24 +47,20 @@ let partyScale = d3.scaleLinear().domain([50,100]).range([0.3,0.95])
 //   Set Public Transportation -
 // DrawMap()
 d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
-  console.log("merging")
-
   d3.json("california-county-map.geojson").then(function(countyMap) {
     console.log("jsonparsingOk?")
+    
     for (let i = 0; i < countyMap.features.length; i++) {
+      let abb = countyMap.features[i].properties.NAME;
+      abb = abb.toUpperCase();
 
-      String mapCountyName = countyMap.features[i].properties.NAME;
-      mapCountyName = mapCountyName.toUpperCase();
-      console.log(mapCountyName)
       console.log("jsonparsingOIs Going on!")
       for(let j = 0; j < medFacData.length; j++) {
-        console.log(medFacData[5].COUNTY_NAME)
-        console.log(medFacData[5].both)
-        if(medFacData[j].COUNTY_NAME == mapCountyName) {
-          console.log("hitted off!")
+        let bcc =medFacData[j].COUNTY_NAME;
+        if(abb === bcc) {
           let regsBoth, regsOnlyOSHPD, statusClosed, statusOpen, statusSuspense, statusUC, size;
           //countyName = medFacData[j].COUNTY_NAME;
-          regesBoth = medFacData[j].both;
+          regedBoth = medFacData[j].both;
           regsOnlyOSHPD = medFacData[j].onlyOSHPD;
           statusClosed = medFacData[j].Closed;
           statusOpen =medFacData[j].Open;
@@ -82,18 +81,17 @@ d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
           else{
             countyMap.features[i].properties.medNum = size;
           }
-
           break;
+
         }
-        break;
+
       }
     }
 
 
-let a = countyMap.features[3].properties.medNum
 //// debug
-console.log(typeof(a));
-
+console.log(countyMap);
+let clicked = [];
 // Calculate the domains of our scales, now that we have the data.
 let gasMin = d3.min(countyMap.features, function(d) { return d.properties.medNum; })
 let gasMax = d3.max(countyMap.features, function(d) { return d.properties.medNum; })
@@ -102,12 +100,12 @@ facNumDegree.domain(d3.extent(countyMap.features, function(d) { return d.propert
 // Calculate scales of the 2nd visualization (bar graph)
 let xScale = d3.scaleBand()
       .range([0, w-80])
-      .domain(countyMap.features.map((s) => s.properties.NAME))
+      .domain(d3.extent(clicked, function(d) { return d[i] }))
       .padding(0.2)
 
 let yScale = d3.scaleLinear()
       .range([h-100, 10])
-      .domain(d3.extent(countyMap.features, function(d) { return d.properties.medNum; }));
+      .domain(d3.extent(medFacData, function(d) { return d.size }));
 
 linkG.append('g')
       .attr('transform', `translate(0, ${h-100})`)
@@ -130,33 +128,44 @@ linkG.append('g')
         .tickFormat('')
       )
 
+
+      let bcc =medFacData[43].COUNTY_NAME
+      let abb = countyMap.features[1].properties.NAME
+      abb = abb.toUpperCase();
+      if(bcc == abb){
+        d = 'cool'
+      }
+      else{
+        d = 'bad'
+      }
+
 linkG.append('text')
   .attr('class', 'label')
   .attr('x', -(h/ 2) + 20)
   .attr('y', -50)
   .attr('transform', 'rotate(-90)')
   .attr('text-anchor', 'middle')
-  .text('Gas Consumption per Person (Therms)')
+  .text('Medical Facitilty Condition'+ d)
 
-let barGroups = linkG.selectAll()
-  .data(countyMap.features)
-  .enter()
-  .append('g')
+  let barGroups = linkG.selectAll()
+    .data(medFacData)
+    .enter()
+    .append('g')
 
-let clicked = []
+  barGroups
+    .append('rect')
+    .attr('class', 'bar')
+    .attr('x', (g) => xScale(clicked))
+    .attr('y', (g) => yScale(medFacData.size))
+    .attr('height', (g) => h - yScale(medFacData.size) -5)
+    .attr('width', xScale.bandwidth())
+    .style("fill", "#CCB")
 
-barGroups
-  .append('rect')
-  .attr('class', 'bar')
-  .attr('x', (g) => xScale(g.properties.NAME))
-  .attr('y', (g) => yScale(g.properties.medNum))
-  .attr('height', (g) => h- yScale(g.properties.medNum) - 100)
-  .attr('width', xScale.bandwidth())
-  .style("fill", "#CCB")
 
 
 //// debug
 //console.log(countyMap);
+
 
 // Initialize the main map of California with tooltips giving detailed information per county.
 let mapGraph = mainG.selectAll("path")
@@ -178,10 +187,10 @@ let mapGraph = mainG.selectAll("path")
       }
       mainG.selectAll("path").transition().duration(500).style("fill", function(d) {
         for(let i = 0; i < clicked.length; i++) {
-          if(clicked[i] == d.properties.NAME) {
+          if(clicked[i] == d.properties.NAME.toUpperCase()) {
             console.log(d.properties.NAME)
             console.log(d.properties.medNum)
-            return facNumDegree(d.properties.medNum);
+            return facNumDegree(medFacData[].size);
           }
         }
         return '#ccc';
