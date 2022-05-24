@@ -49,15 +49,16 @@ let partyScale = d3.scaleLinear().domain([50,100]).range([0.3,0.95])
 d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
   console.log("merging")
 
-  d3.json("california-county-map.geojson").then(function(countyMapData) {
+  d3.json("california-county-map.geojson").then(function(countyMap) {
     console.log("jsonparsingOk?")
-    for (let i = 0; i < countyMapData.features.length; i++) {
+    for (let i = 0; i < countyMap.features.length; i++) {
 
-      let mapCountyName = countyMapData.features[i].properties.NAME;
+      let mapCountyName = countyMap.features[i].properties.NAME;
       console.log("jsonparsingOIs Going on!")
       for(let j = 0; j < medFacData.length; j++) {
         if(medFacData[j].COUNTY_NAME.toUpperCase() == mapCountyName) {
           let regsBoth, regsOnlyOSHPD, statusClosed, statusOpen, statusSuspense, statusUC, size;
+          //countyName = medFacData[j].COUNTY_NAME;
           regedBoth = medFacData[j].both;
           regsOnlyOSHPD = medFacData[j].onlyOSHPD;
           statusClosed = medFacData[j].Closed;
@@ -66,19 +67,84 @@ d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
           statusUC = medFacData[j].Under_Construction;
           size = medFacData[j].size;
 
-          countyMapData.features[i].properties.regsBoth = regesBoth;
-          countyMapData.features[i].properties.regsOnlyOSHPD = regsOnlyOSHPD;
-          countyMapData.features[i].properties.statusClosed = statusClosed;
-          countyMapData.features[j].properties.statusOpen = statusOpen;
-          countyMapData.features[j].properties.statusSuspense = statusSuspense;
-          countyMapData.features[j].properties.statusUC = statusUC;
-          countyMapData.features[j].properties.medNum = medNum;
+          countyMap.features[i].properties.countyName = mapCountyName;
+          countyMap.features[i].properties.regsBoth = regesBoth;
+          countyMap.features[i].properties.regsOnlyOSHPD = regsOnlyOSHPD;
+          countyMap.features[i].properties.statusClosed = statusClosed;
+          countyMap.features[j].properties.statusOpen = statusOpen;
+          countyMap.features[j].properties.statusSuspense = statusSuspense;
+          countyMap.features[j].properties.statusUC = statusUC;
+          countyMap.features[j].properties.medNum = size;
           break;
         }
         break;
       }
     }
 
+
+
+//// debug
+console.log(countyMap);
+
+// Calculate the domains of our scales, now that we have the data.
+let gasMin = d3.min(countyMap.features, function(d) { return d.properties.medNum; })
+let gasMax = d3.max(countyMap.features, function(d) { return d.properties.medNum; })
+gasConsumptionScale.domain(d3.extent(countyMap.features, function(d) { return d.properties.medNum; }))
+populationScale.domain(d3.extent(countyMap.features, function(d) { return d.properties.population }))
+
+// Calculate scales of the 2nd visualization (bar graph)
+let xScale = d3.scaleBand()
+      .range([0, w-80])
+      .domain(countyMap.features.map((s) => s.properties.countyName))
+      .padding(0.2)
+
+let yScale = d3.scaleLinear()
+      .range([h-100, 10])
+      .domain(d3.extent(countyMap.features, function(d) { return d.properties.medNum; }));
+
+linkG.append('g')
+      .attr('transform', `translate(0, ${h-100})`)
+      .call(d3.axisBottom(xScale))
+      .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");
+
+linkG.append('g')
+      .call(d3.axisLeft(yScale));
+
+linkG.append('g')
+      .attr('class', 'grid')
+      .call(d3.axisLeft()
+        .scale(yScale)
+        .tickSize(-w+80, 0, 0)
+        .tickFormat('')
+      )
+
+linkG.append('text')
+  .attr('class', 'label')
+  .attr('x', -(h/ 2) + 20)
+  .attr('y', -50)
+  .attr('transform', 'rotate(-90)')
+  .attr('text-anchor', 'middle')
+  .text('Gas Consumption per Person (Therms)')
+
+let barGroups = linkG.selectAll()
+  .data(mapData.features)
+  .enter()
+  .append('g')
+
+let clicked = []
+
+barGroups
+  .append('rect')
+  .attr('class', 'bar')
+  .attr('x', (g) => xScale(g.properties.countyName))
+  .attr('y', (g) => yScale(g.properties.medNum))
+  .attr('height', (g) => h- yScale(g.properties.medNum) - 100)
+  .attr('width', xScale.bandwidth())
 
 
 //// debug
