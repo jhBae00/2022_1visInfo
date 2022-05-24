@@ -1,10 +1,3 @@
-/*
- *  Alfred Lam
- *  CMPS 161
- *  Prog 2
- *  map.js - reads in 5 csv files with data, merges them into 1 array, and displays the results in interactive
- *           ways using D3 and SVG elements.
- */
 
 //Width and height
 let w = 760;
@@ -53,9 +46,10 @@ let partyScale = d3.scaleLinear().domain([50,100]).range([0.3,0.95])
 //   Set Gas Consumption       - Yellow to red, shade = higher gas consumption, gray = no data
 //   Set Public Transportation -
 // DrawMap()
-d3.csv("https://github.com/jhBae00/2022_1visInfo/blob/main/california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
+d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
   console.log("merging")
-  d3.json("https://github.com/jhBae00/2022_1visInfo/blob/main/california-county-map.geojson").then(function(countyMapData) {
+
+  d3.json("california-county-map.geojson").then(function(countyMapData) {
     console.log("jsonparsingOk?")
     for (let i = 0; i < countyMapData.features.length; i++) {
 
