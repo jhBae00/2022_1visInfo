@@ -1,142 +1,226 @@
 
-<!doctype html>
-<html lang="en">
-<head>
- <meta charset="utf-8">
- <title>California Medical Facility</title>
-
- <style type="text/css">
-	 body {
-		 margin: 0;
-		 background-color: #76C3F2;
-		 font-family: "proxima-nova", "Source Sans Pro", sans-serif;
-	 }
-
-	 #container {
-		 width: 1600px;
-		 margin-left: 30px;
-		 margin-right: auto;
-		 margin-top: 30px;
-		 padding: 30px;
-		 background-color: white;
-	 }
-
-	 #tasks {
-		 width: 320px;
-		 height: 48px;
-		 background-color: #aec6cf;
-	 }
-
-	 #tasks text {
-		 font-size: 15px;
-	 }
-
-	 h1 {
-		 font-size: 24px;
-		 margin: 0;
-	 }
-
-	 p {
-		 font-size: 16px;
-		 margin: 15px 0 10px 0;
-	 }
-
-	 a {
-		 color: #799DCB;
-		 text-decoration: none;
-		 transition: color .3s, background .3s, border .3s;
-	 }
-	 a:hover {
-		 color: #48494b;
-		 background: #e7e8e9;
-	 }
-
-	 g {
- 		cursor: pointer;
- 		pointer-events: all;
- 	}
-	 path {
-		 fill: #aec6cf;/*#d2b48c;#799dcb;*/
-		 stroke: #fff;
-	 }
-	 path:hover {
-		 fill:#48494b;
-		 cursor:pointer;
-	 }
-	 svg {
-		background-color: #aec6cf;
-		padding-left: 20px;
-	}
 
 
-	 #tooltip {
-		 width: 280px;
-		 height: auto;
-		 padding: 5px;
-		 background-color: #fff;
-		 color: #000;
-		 -webkit-border-radius: 5px;
-		 -moz-border-radius: 5px;
-		 border-radius: 5px;
-		 -webkit-box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
-		 -moz-box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
-		 box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
-		 pointer-events: none;
-		 position: absolute;
-	 }
+let w = 780;
+let h = 600;
 
-	 #tooltip.hidden {
-		 display: none;
-	 }
+let projection = d3.geoMercator()
+             .center([ -120, 37 ])
+             .translate([ 290, 310 ])
+             .scale([ 780*3.1 ]);
 
-	 #tooltip p {
-		 margin: 0;
-		 font-size: 14px;
-		 line-height: 18px;
-	 }
+let path = d3.geoPath()
+         .projection(projection);
+//svg
+let svg = d3.select("#container")
+      .append("svg")
+      .attr("width", 780 * 2)
+      .attr("height", 600)
 
-	 #legend{
-	 	 height: auto;
-		 width: 110px;
+let geoGraph = svg.append("g")
+let barChart = svg.append("g")
+    .attr("transform", "translate(700 16)")
 
-		 padding: 3.5px;
-		 background-color:grey;
-		 color: #000;
-		 pointer-events: none;
-		 position: absolute;
-		 left: 110px;
-		 top: 300px;
-	 }
+console.log("dddddd")
+console.log(geoGraph)
+
+let tasks = d3.select("#container").select("#tasks")
+let facNumDegree = d3.scaleSequential().interpolator(d3.interpolateOrRd)
 
 
+d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
+  console.log("merging")
+  d3.json("california-county-map.geojson").then(function(countyMap) {
+    console.log("jsonparsingOk?")
+    for (let i = 0; i < countyMap.features.length; i++) {
+      let mapCountyName = countyMap.features[i].properties.NAME;
+      console.log("jsonparsingOIs Going on!")
+      for(let j = 0; j < medFacData.length; j++) {
+        if(medFacData[j].COUNTY_NAME.toUpperCase() == mapCountyName) {
+          let regsBoth, regsOnlyOSHPD, statusClosed, statusOpen, statusSuspense, statusUC, size;
+          regedBoth = medFacData[j].both;
+          regsOnlyOSHPD = medFacData[j].onlyOSHPD;
+          statusClosed = medFacData[j].Closed;
+          statusOpen =medFacData[j].Open;
+          statusSuspense = medFacData[j].Suspense;
+          statusUC = medFacData[j].Under_Construction;
+          size = medFacData[j].size;
+          countyMap.features[i].properties.countyName = mapCountyName;
+          countyMap.features[i].properties.regsBoth = regesBoth;
+          countyMap.features[i].properties.regsOnlyOSHPD = regsOnlyOSHPD;
+          countyMap.features[i].properties.statusClosed = statusClosed;
+          countyMap.features[i].properties.statusOpen = statusOpen;
+
+          countyMap.features[i].properties.statusSuspense = statusSuspense;
+          countyMap.features[i].properties.statusUC = statusUC
+
+          if(size !=true){
+            countyMap.features[i].properties.medNum = 0;
+          }
+          else{
+            countyMap.features[i].properties.medNum = size;
+          }
+
+          break;
+        }
+        break;
+      }
+    }
+
+
+let clicked = [];
+facNumDegree.domain(d3.extent(countyMap.features, function(d) { return d.properties.ALAND; }))
+
+let xAxisScale = d3.scaleBand()
+      .range([0, w -100])
+      .domain(d3.extent(clicked,
+                        function(d) { return d[i] }))
+      .padding(0.3)
+
+let yAxisScale = d3.scaleLinear()
+      .range([h - 100, 10])
+      .domain(d3.extent(medFacData,
+                          function(d) { return d.size }));
+
+barChart.append('g')
+      .attr('transform', `translate(0, ${h-100})`)
+      .call(d3.axisBottom(xAxisScale))
+      .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");
+
+barChart.append('g')
+      .call(d3.axisLeft(yAxisScale));
+
+barChart.append('g')
+      .attr('class', 'grid')
+      .call(d3.axisLeft()
+        .scale(yAxisScale)
+        .tickSize(-w+80, 0, 0)
+        .tickFormat('')
+      )
+
+
+      let fff =medFacData[43].COUNTY_NAME
+      let ggg = countyMap.features[1].properties.NAME
+      ggg = ggg.toUpperCase();
+      if(fff == ggg){
+        f = 'cool'
+      }
+      else{
+        f = 'bad'
+      }
+
+      deluca = medFacData[43].COUNTY_NAME
+
+      for(i=0; i<medFacData.length; i++){
+        let bcc = medFacData[i].COUNTY_NAME;
+        for(j=0; j<medFacData.length; j++){
+          let abb = countyMap.features[j].properties.NAME
+          abb = abb.toUpperCase();
+          if(bcc == abb){
+            d = 'cool'
+          }
+          else{
+            d = 'bad'
+          }
+        }
+      }
+
+
+barChart.append('text')
+  .attr('class', 'label')
+  .attr('x', -(h/ 2) + 20)
+  .attr('y', -50)
+  .attr('transform', 'rotate(-90)')
+  .attr('text-anchor', 'middle')
+  .text('Medical Facitilty Condition')
+
+  let barGroups = barChart.selectAll()
+    .data(medFacData)
+    .enter()
+    .append('g')
+
+  barGroups
+    .append('rect')
+    .attr('class', 'bar')
+    .attr('x', (g) => xAxisScale(clicked))
+    .attr('y', (g) => yAxisScale(medFacData.size))
+    .attr('height', (g) => h - yAxisScale(medFacData.size) -5)
+    .attr('width', xAxisScale.bandwidth())
+    .style("fill", "#CCB")
 
 
 
- </style>
-</head>
-<body>
- <div id="container">
-	 <p>
-	 <h1>California Medical Facilities</h1>
-	 <br>
-	 <svg id="tasks">
-			 <g id="status">
-				 <text id="task1" x="3" y="27">Facility Status</text>
-			 </g>
-			 <g id="setPartyViz" transform="translate(120)">
-					 <text id="task2" x="0" y="27" font-size: 15px>Unregistered Facilities</text>
-			 </g>
-	 </svg>
-	 </p>
- </div>
- <div class="">
-	 <!--<svg id="legend">
-		 <text x="2" y="20">Numper of medical facilitied</text>
-	 </svg>-->
- </div>
-</body>
+//// debug
+//console.log(countyMap);
+let mapGraph = geoGraph.selectAll("path")
+  .data(countyMap.features)
+  .enter()
+  .append("path")
+    .attr("d", path)
+    .style("fill", "#DBDBDB")
+    .on("click", function(d) {
+      if(clicked.length == 0) {
+        clicked.push(d.properties.NAME)
+      }
+      else if(clicked.includes(d.properties.NAME)) {
+        clicked.splice(clicked.indexOf(d.properties.NAME), 1);
+        //d3.select(this).attr("stroke", "none");
+      }
+      else {
+        clicked.push(d.properties.NAME);
+      }
+      geoGraph.selectAll("path").transition().duration(500).style("fill", function(d) {
+        for(let i = 0; i < clicked.length; i++) {
+          if(clicked[i] == d.properties.NAME) {
+            console.log(d.properties.NAME)
+            console.log(d.properties.medNum)
+            return facNumDegree(d.properties.ALAND);
+          }
+        }
+        return '#ccc';
+      })
 
-<script src="https://d3js.org/d3.v5.min.js"></script>
-<script type="text/javascript" src="map.js"></script>
+    })
 
-</html>
+    tasks.select("#task1").on("click", function() {
+      mapGraph.transition().duration(700)
+        .style("fill", function(d) {
+        //  if(){
+
+        //  }
+        //  else{}
+
+        //Get data value
+        let value = d.properties.ALAND;
+        if (value) {
+          return facNumDegree(value);
+        } else {
+          return "#DBDBDB";
+        }
+      })
+      //initialize
+      clicked = [];
+      barChart.selectAll("rect").attr("stroke", "none")
+    })
+    tasks.select("#task2").on("click", function() {
+      mapGraph.transition().duration(700)
+        .style("fill", function(d) {
+
+        let value = d.properties.ALAND;
+        if (value) {
+          return facNumDegree(value);
+        } else {
+          return "#DBDBDB";
+        }
+      })
+      //initialize
+      clicked = [];
+      barChart.selectAll("rect").attr("stroke", "none")
+    })
+  })
+})
