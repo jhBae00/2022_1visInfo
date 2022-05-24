@@ -74,7 +74,12 @@ d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
           countyMap.features[j].properties.statusOpen = statusOpen;
           countyMap.features[j].properties.statusSuspense = statusSuspense;
           countyMap.features[j].properties.statusUC = statusUC;
-          countyMap.features[j].properties.medNum = size;
+          if(size != true){
+            countyMap.features[j].properties.medNum = 0;
+          }
+          else{
+            countyMap.features[j].properties.medNum = size;
+          }
           break;
         }
         break;
