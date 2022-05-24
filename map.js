@@ -25,9 +25,6 @@ let linkG = svg.append("g")
     .attr("transform", "translate(800 10)")
     .attr("class", "noPointerEvents")
 
-console.log("dddddd")
-console.log(mainG)
-
 // Reference to our controls panel and legend svg in the HTML
 let controls = d3.select("#container").select("#controls")
 let legend = d3.select("#legend")
@@ -53,11 +50,14 @@ d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
     console.log("jsonparsingOk?")
     for (let i = 0; i < countyMap.features.length; i++) {
 
-      let mapCountyName = countyMap.features[i].properties.NAME;
+      String mapCountyName = countyMap.features[i].properties.NAME;
+      mapCountyName = mapCountyName.toUpperCase();
       console.log(mapCountyName)
       console.log("jsonparsingOIs Going on!")
       for(let j = 0; j < medFacData.length; j++) {
-        if(medFacData[j].COUNTY_NAME.toUpperCase() == mapCountyName.toUpperCase()) {
+        console.log(medFacData[5].COUNTY_NAME)
+        console.log(medFacData[5].both)
+        if(medFacData[j].COUNTY_NAME == mapCountyName) {
           console.log("hitted off!")
           let regsBoth, regsOnlyOSHPD, statusClosed, statusOpen, statusSuspense, statusUC, size;
           //countyName = medFacData[j].COUNTY_NAME;
@@ -69,7 +69,7 @@ d3.csv("california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
           statusUC = medFacData[j].Under_Construction;
           size = medFacData[j].size;
 
-          //countyMap.features[i].properties.countyName = mapCountyName;
+          countyMap.features[i].properties.countyName = mapCountyName;
           countyMap.features[i].properties.regsBoth = regesBoth;
           countyMap.features[i].properties.regsOnlyOSHPD = regsOnlyOSHPD;
           countyMap.features[i].properties.statusClosed = statusClosed;
