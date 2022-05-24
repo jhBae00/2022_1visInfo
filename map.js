@@ -132,7 +132,7 @@ linkG.append('text')
   .text('Gas Consumption per Person (Therms)')
 
 let barGroups = linkG.selectAll()
-  .data(mapData.features)
+  .data(countyMap.features)
   .enter()
   .append('g')
 
@@ -148,11 +148,11 @@ barGroups
 
 
 //// debug
-//console.log(countyMapData);
+//console.log(countyMap);
 
 // Initialize the main map of California with tooltips giving detailed information per county.
 let mainMap = mainG.selectAll("path")
-  .data(countyMapData.features)
+  .data(countyMap.features)
   .enter()
   .append("path")
     .attr("d", path)
@@ -177,15 +177,7 @@ let mainMap = mainG.selectAll("path")
         }
         return '#ccc';
       })
-      linkG.selectAll(".bar")
-        .attr("stroke", function(d2) {
-          for(let i = 0; i < clicked.length; i++) {
-            if(clicked[i] == d2.properties.NAME) {
-              return "red"
-            }
-          }
-          return "none"
-        })
+     
     })
 
     //////////////////
