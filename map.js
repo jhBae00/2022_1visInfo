@@ -55,7 +55,7 @@ let partyScale = d3.scaleLinear().domain([50,100]).range([0.3,0.95])
 // DrawMap()
 d3.csv("https://github.com/jhBae00/2022_1visInfo/blob/main/california-medical-facilitiy-crosswalk.csv").then(function(medFacData) {
   console.log("merging")
-  d3.json("https://github.com/jhBae00/2022_1visInfo/blob/main/california-county-map-geojson.txt").then(function(countyMapData) {
+  d3.json("https://github.com/jhBae00/2022_1visInfo/blob/main/california-county-map.geojson").then(function(countyMapData) {
     console.log("jsonparsingOk?")
     for (let i = 0; i < countyMapData.features.length; i++) {
 
